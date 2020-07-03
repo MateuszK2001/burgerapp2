@@ -10,7 +10,7 @@ const burger = (props:Props) => {
     const ingredientsTransformed = Object.entries(props.ingredients) as ['meat' | 'cheese' | 'salad' | 'bacon', Number][];
     let data:JSX.Element|JSX.Element[] = ingredientsTransformed
         .map( ([name, cnt]) => [...Array(cnt)]
-            .map( (_, id) => <BurgerIngredient key={`${name}${cnt}`} type={name} />))
+            .map( (_, id) => <BurgerIngredient key={`${name}${id}`} type={name} />))
             .reduce((a, b)=>{
                 return a = a.concat(b);
             });
