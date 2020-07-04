@@ -7,8 +7,10 @@ interface Props {
     show: boolean;
     modalClosed: ()=>void;
 }
-
-const modal = (props: Props) => (
+function equal(prev:Props, next:Props){
+    return prev.show === next.show;
+}
+const Modal = (props: Props) => (
     <Fragment>
         <Backdrop show={props.show} clicked={props.modalClosed} />
         <div
@@ -22,4 +24,4 @@ const modal = (props: Props) => (
     </Fragment>
 );
 
-export default modal;
+export default React.memo(Modal, equal);

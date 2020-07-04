@@ -10,7 +10,7 @@ interface Props{
     price: number;
 }
 
-const orderSummary = (props:Props)=>{
+const OrderSummary = (props:Props)=>{
     const ingredientSummary = Object.entries(props.ingredients).map(([key, value], id)=>{
         return (
             <li key={id}>
@@ -33,4 +33,4 @@ const orderSummary = (props:Props)=>{
     )
 };
 
-export default orderSummary;
+export default OrderSummary;
