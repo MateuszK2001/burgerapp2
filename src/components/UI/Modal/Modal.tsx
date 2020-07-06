@@ -8,7 +8,7 @@ interface Props {
     modalClosed: ()=>void;
 }
 function equal(prev:Props, next:Props){
-    return prev.show === next.show;
+    return prev.show === next.show && prev.children === next.children;
 }
 const Modal = (props: Props) => (
     <Fragment>
