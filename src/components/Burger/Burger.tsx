@@ -6,7 +6,7 @@ export interface Props{
     ingredients: Ingredients;
 }
 
-const burger = (props:Props) => {
+const Burger = (props:Props) => {
     const ingredientsTransformed = Object.entries(props.ingredients) as ['meat' | 'cheese' | 'salad' | 'bacon', Number][];
     let data:JSX.Element|JSX.Element[] = ingredientsTransformed
         .map( ([name, cnt]) => [...Array(cnt)]
@@ -26,4 +26,4 @@ const burger = (props:Props) => {
     );
 }
 
-export default burger;
+export default Burger;

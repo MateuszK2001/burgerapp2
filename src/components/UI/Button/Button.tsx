@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import classes from'./Button.module.css';
 
 interface Props{
     children: React.ReactNode;
-    clicked: ()=>void;
+    clicked: (event:React.MouseEvent<HTMLElement>)=>void;
     btnType: 'Danger' | "Success"
 }
 

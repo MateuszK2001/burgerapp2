@@ -6,6 +6,7 @@ import OrderSummary from '../../components//Burger/OrderSummary/OrderSummary';
 import AxiosOrders from '../../axios-orders';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
+import { useHistory } from 'react-router-dom';
 
 export interface Ingredients {
     salad: number;
@@ -42,10 +43,30 @@ const BurgerBuilder = (props: Props) => {
         Object.fromEntries(Object.keys(INGREDIENT_PRICES)
             .map(name => [name, false])) as { [key in keyof Ingredients]: boolean }
     );
+    const history = useHistory();
+    
+    const updateIngredientLessEnabling = (ingredients: Ingredients) => {
+        const copy = { ...canRemoveIngredient };
+        for(const name in ingredients){
+            const cnt = ingredients[name as keyof Ingredients];
+            if (cnt === 0 || cnt === 1) {
+                copy[name as keyof Ingredients] = cnt === 1;
+            }
+        }
+        canRemoveIngredientUpdate(copy);
+    }
+    const updatePurchasableState = (newIngredients: Ingredients) => {
+        const amount = Object.values(newIngredients).reduce((a, b) => {
+            return a + b;
+        }, 0);
+        purchasableUpdate(amount > 0);
+    }
     useEffect(() => {
-        AxiosOrders.get('/ingredients')
+        AxiosOrders.get('/ingredients.json')
             .then(response => {
                 ingredientsUpdate(response.data);
+                updateIngredientLessEnabling(response.data);
+                updatePurchasableState(response.data);
                 console.log(response.data);
             })
             .catch(err=>{})
@@ -55,42 +76,22 @@ const BurgerBuilder = (props: Props) => {
         purchasingUpdate(false);
     }
     const purchaseContinueHandler = () => {
-        loadingUpdate(true);
-        const order = {
-            ingredients: ingredients,
-            price: totalPrice,
-            customer: {
-                name: 'Mateusz Kisiel',
-                address: {
-                    street: 'Teststreet 1',
-                    zipCode: '43300',
-                    country: 'Poland'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
-        }
-        AxiosOrders.post('/oders.json', order)
-            .then(response => {
-                console.log(response);
-                loadingUpdate(false);
-                purchasingUpdate(false);
-            })
-            .catch((err) => {
-                console.log(err);
-                loadingUpdate(false);
-                purchasingUpdate(false);
-            });
+        // loadingUpdate(false);
+        purchasingUpdate(false);
+        const queryParams=Object.entries(ingredients as Ingredients).map(([key, val])=>{
+            return encodeURIComponent(key)+"="+encodeURIComponent(val);
+        })
+        queryParams.push('price='+totalPrice);
 
+        history.push({
+            pathname: '/checkout',
+            search: '?'+queryParams.join('&')
+        });
+        // loadingUpdate(true);
         // purchasingUpdate(false);
         // alert("You continue!");
     }
-    const updatePurchasableState = (newIngredients: Ingredients) => {
-        const amount = Object.values(newIngredients).reduce((a, b) => {
-            return a + b;
-        }, 0);
-        purchasableUpdate(amount > 0);
-    }
+    
 
     const orderBtnClicked = () => {
         purchasingUpdate(true);
@@ -102,13 +103,7 @@ const BurgerBuilder = (props: Props) => {
         });
         totalPriceUpdate(newPrice);
     }
-    const updateIngredientLessEnabling = (type: keyof Ingredients, cnt: Number) => {
-        const copy = { ...canRemoveIngredient };
-        if (cnt === 0 || cnt === 1) {
-            copy[type] = cnt === 1;
-            canRemoveIngredientUpdate(copy);
-        }
-    }
+    
 
     let OrderSummaryJsx = <Spinner />;
     let BurgerJsx = <Spinner />;
@@ -119,7 +114,7 @@ const BurgerBuilder = (props: Props) => {
             copy[what] = Math.max(ingredients[what] - 1, 0);
             ingredientsUpdate(copy);
             updatePriceState(copy);
-            updateIngredientLessEnabling(what, copy[what]);
+            updateIngredientLessEnabling(copy);
             updatePurchasableState(copy);
         };
         const moreClicked = (what: keyof Ingredients) => {
@@ -127,7 +122,7 @@ const BurgerBuilder = (props: Props) => {
             copy[what] = ingredients[what] + 1;
             ingredientsUpdate(copy);
             updatePriceState(copy);
-            updateIngredientLessEnabling(what, copy[what]);
+            updateIngredientLessEnabling(copy);
             updatePurchasableState(copy);
         };
 
