@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import classes from './Order.module.css';
 import { Ingredients, ingredientsLabels } from '../../containers/BurgerBuilder/BurgerBuilder';
 

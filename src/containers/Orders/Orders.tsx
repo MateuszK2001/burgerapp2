@@ -1,8 +1,9 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Order from '../../components/Order/Order';
 import AxiosOrders from '../../axios-orders';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import { Ingredients } from '../BurgerBuilder/BurgerBuilder';
+import Spinner from '../../components/UI/Spinner/Spinner';
 //import classes from'./Orders.module.css';
 
 interface Props {
@@ -32,16 +33,18 @@ const Orders = (props: Props) => {
                 loadingUpdate(false);
             })
     }, []);
+    const ordersJsx = loading
+        ? <Spinner />
+        : orders.map( (order)=>(
+            <Order 
+                key={order.id}
+                price={order.price}
+                ingredients={order.ingredients}/>
+        ));
+    
     return (
         <div>
-            {
-                orders.map( (order)=>(
-                    <Order 
-                        key={order.id}
-                        price={order.price}
-                        ingredients={order.ingredients}/>
-                ))
-            }
+            {ordersJsx}
         </div>
     );
 };

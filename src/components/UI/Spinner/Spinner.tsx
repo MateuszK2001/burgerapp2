@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import classes from'./Spinner.module.css';
 
 interface Props{

@@ -1,9 +1,8 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import classes from './CheckoutSummary.module.css';
 import Burger from '../../Burger/Burger';
 import { Ingredients } from '../../../containers/BurgerBuilder/BurgerBuilder';
 import Button from '../../UI/Button/Button';
-import { useHistory } from 'react-router-dom';
 
 interface Props {
     ingredients: Ingredients;
@@ -12,7 +11,6 @@ interface Props {
 }
 
 const CheckoutSummary =  (props: Props) => {
-    const history = useHistory();
     return (
         <div className={classes.CheckoutSummary}>
             <h1>We hope it tastes well!</h1>

@@ -1,4 +1,4 @@
-import React, {Fragment, useState, useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import CheckoutSummary from '../../components/Order/CheckoutSummary/CheckoutSummary';
 import { Ingredients } from '../BurgerBuilder/BurgerBuilder';
 import { useHistory, useLocation, Route, withRouter, RouteComponentProps } from 'react-router-dom';
@@ -17,10 +17,15 @@ const Checkout = (props:Props&RouteComponentProps)=>{
         salad: 0
     } as Ingredients);
     const [price, priceUpdate] = useState(0);
-
+    
     useEffect(()=>{
         const query = new URLSearchParams(location.search);
-        const ingredientsNew = {...ingredients};
+        const ingredientsNew = {
+            bacon: 0,
+            cheese: 0,
+            meat: 0,
+            salad: 0
+        };
         for(const [key, val] of query.entries()){
             if(key === 'price'){
                 priceUpdate(Number(val));
@@ -31,13 +36,13 @@ const Checkout = (props:Props&RouteComponentProps)=>{
         }        
 
         ingredientsUpdate(ingredientsNew);
-    }, []);
+    }, [location]);
     return(
         <div>
             <CheckoutSummary 
                 ingredients={ingredients} 
                 checkoutCancelled={()=>history.goBack() }
-                checkoutContinued={()=>{history.replace('/checkout/contact-data')}} 
+                checkoutContinued={()=>{history.replace('/checkout/contact-data'+location.search)}} 
             />
             <Route path={props.match.path+'/contact-data'}  render={()=><ContactData ingredients={ingredients} price={price}/>} />
         </div>

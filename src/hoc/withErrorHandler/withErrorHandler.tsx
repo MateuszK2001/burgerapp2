@@ -5,19 +5,20 @@ import { AxiosInstance } from 'axios';
 
 
 const withErrorHandler = (WrappedComponent: React.ElementType, axios: AxiosInstance) => {
-    let isErrorUpdate: (newVal: boolean) => void;
+    let errorUpdate: (newVal: string|null) => void = (newVal)=>{if(newVal != null) console.log("withErrorHandler: " + newVal)};
     const reqInterceptor = axios.interceptors.request.use((req) => {
-        isErrorUpdate(false);
+        errorUpdate(null);
         return req;
     });
     const resInterceptor = axios.interceptors.response.use(res => res, error => {
-        isErrorUpdate(true);
+        errorUpdate(error.message as string); ////// zmianiec !!!!!!!!!!!!!
+        console.log(error);
     });
     
     return (props: any) => {
-        const tmp = useState(false);
-        const isError = tmp[0];
-        isErrorUpdate = (newVal: boolean) => { tmp[1](newVal) };
+        const tmp = useState(null as string|null);
+        const error = tmp[0];
+        errorUpdate = (newVal: string|null) => { tmp[1](newVal) };
 
 
         useEffect(() => {
@@ -32,8 +33,9 @@ const withErrorHandler = (WrappedComponent: React.ElementType, axios: AxiosInsta
 
         return (
             <Fragment>
-                <Modal show={isError} modalClosed={() => {isErrorUpdate(false)}}>
-                    Something didn't work
+                <Modal show={error != null} modalClosed={() => {errorUpdate(null)}}>
+                    Something didn't work <br/>
+                    {error}
                 </Modal>
                 <WrappedComponent {...props} />
             </Fragment>
