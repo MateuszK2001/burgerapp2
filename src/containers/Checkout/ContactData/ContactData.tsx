@@ -5,6 +5,7 @@ import AxiosOrders from '../../../axios-orders';
 import { useHistory } from 'react-router-dom';
 import { Ingredients } from '../../BurgerBuilder/BurgerBuilder';
 import Spinner from '../../../components/UI/Spinner/Spinner';
+import Input from '../../../components/UI/Input/Input';
 
 interface Props {
     ingredients: Ingredients;
@@ -58,10 +59,10 @@ const ContactData = (props: Props) => {
 
     let form = (
         <form>
-            <input className={classes.Input} type='text' name='name' placeholder='Your Name' />
-            <input className={classes.Input} type='email' name='email' placeholder='Your Mail' />
-            <input className={classes.Input} type='text' name='street' placeholder='Street' />
-            <input className={classes.Input} type='text' name='postal' placeholder='Postal Code' />
+            <Input inputtype='input'  type='text' name='name' placeholder='Your Name' />
+            <Input inputtype='input' type='email' name='email' placeholder='Your Mail' />
+            <Input inputtype='input' type='text' name='street' placeholder='Street' />
+            <Input inputtype='input' type='text' name='postal' placeholder='Postal Code' />
             <Button btnType='Success' clicked={orderSubmitHandler}>ORDER</Button>
         </form>
     );

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import Modal from '../../components/UI/Modal/Modal';
@@ -32,6 +32,11 @@ const INGREDIENT_PRICES = {
     bacon: 0.7
 }
 
+const INGREDIENT_NAMES = [
+    'salad', 'bacon', 'cheese', 'meat'
+];
+type IngredientBoolean = { [key in keyof Ingredients]: boolean };
+
 const BurgerBuilder = (props: Props) => {
 
     const [ingredients, ingredientsUpdate] = useState(null as Ingredients | null);
@@ -41,26 +46,25 @@ const BurgerBuilder = (props: Props) => {
     const [isSummaryLoading, loadingUpdate] = useState(false);
     const [canRemoveIngredient, canRemoveIngredientUpdate] = useState(
         Object.fromEntries(Object.keys(INGREDIENT_PRICES)
-            .map(name => [name, false])) as { [key in keyof Ingredients]: boolean }
+            .map(name => [name, false])) as IngredientBoolean
     );
     const history = useHistory();
     
-    const updateIngredientLessEnabling = (ingredients: Ingredients) => {
-        const copy = { ...canRemoveIngredient };
+    const updateIngredientLessEnabling = useCallback( (ingredients: Ingredients) => {
+        const copy = Object.fromEntries(INGREDIENT_NAMES.map(name => [name, false])) as IngredientBoolean;
         for(const name in ingredients){
             const cnt = ingredients[name as keyof Ingredients];
-            if (cnt === 0 || cnt === 1) {
-                copy[name as keyof Ingredients] = cnt === 1;
-            }
+            copy[name as keyof Ingredients] = cnt >= 1;
         }
         canRemoveIngredientUpdate(copy);
-    }
-    const updatePurchasableState = (newIngredients: Ingredients) => {
+    }, []);//
+    const updatePurchasableState = useCallback( (newIngredients: Ingredients) => {
         const amount = Object.values(newIngredients).reduce((a, b) => {
             return a + b;
         }, 0);
         purchasableUpdate(amount > 0);
-    }
+    }, []);
+
     useEffect(() => {
         AxiosOrders.get('/ingredients.json')
             .then(response => {
@@ -70,7 +74,7 @@ const BurgerBuilder = (props: Props) => {
                 console.log(response.data);
             })
             .catch(err=>{})
-    }, []);
+    }, [updateIngredientLessEnabling, updatePurchasableState]);
 
     const purchaseCanceledHandler = () => {
         purchasingUpdate(false);
