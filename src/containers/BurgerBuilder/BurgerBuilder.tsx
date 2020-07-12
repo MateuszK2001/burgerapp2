@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import Burger from '../../components/Burger/Burger'
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import Modal from '../../components/UI/Modal/Modal';
@@ -50,31 +50,46 @@ const BurgerBuilder = (props: Props) => {
     );
     const history = useHistory();
     
-    const updateIngredientLessEnabling = useCallback( (ingredients: Ingredients) => {
+    useEffect( () => { /// updatePurchasableState
+        if(ingredients===null){
+            purchasableUpdate(false);
+            return;
+        }
+        const amount = Object.values(ingredients).reduce((a, b) => {
+            return a + b;
+        }, 0);
+        purchasableUpdate(amount > 0);
+    }, [ingredients]);
+
+    useEffect(()=>{ /// lessBtn dis/enabling
         const copy = Object.fromEntries(INGREDIENT_NAMES.map(name => [name, false])) as IngredientBoolean;
         for(const name in ingredients){
             const cnt = ingredients[name as keyof Ingredients];
             copy[name as keyof Ingredients] = cnt >= 1;
         }
         canRemoveIngredientUpdate(copy);
-    }, []);//
-    const updatePurchasableState = useCallback( (newIngredients: Ingredients) => {
-        const amount = Object.values(newIngredients).reduce((a, b) => {
-            return a + b;
-        }, 0);
-        purchasableUpdate(amount > 0);
-    }, []);
+    }, [ingredients]);
+
+    useEffect(()=>{ /// price updating
+        if(ingredients === null){
+            totalPriceUpdate(0);
+            return;
+        }
+        let newPrice = 0;
+        Object.entries(ingredients).forEach(([key, cnt]: [string, number]) => {
+            newPrice += (INGREDIENT_PRICES[key as keyof Ingredients] * cnt);
+        });
+        totalPriceUpdate(newPrice);
+    }, [ingredients]);
 
     useEffect(() => {
         AxiosOrders.get('/ingredients.json')
             .then(response => {
                 ingredientsUpdate(response.data);
-                updateIngredientLessEnabling(response.data);
-                updatePurchasableState(response.data);
                 console.log(response.data);
             })
             .catch(err=>{})
-    }, [updateIngredientLessEnabling, updatePurchasableState]);
+    }, []);
 
     const purchaseCanceledHandler = () => {
         purchasingUpdate(false);
@@ -100,13 +115,7 @@ const BurgerBuilder = (props: Props) => {
     const orderBtnClicked = () => {
         purchasingUpdate(true);
     };
-    const updatePriceState = (newIngredients: Ingredients) => {
-        let newPrice = 0;
-        Object.entries(newIngredients).forEach(([key, cnt]: [string, number]) => {
-            newPrice += (INGREDIENT_PRICES[key as keyof Ingredients] * cnt);
-        });
-        totalPriceUpdate(newPrice);
-    }
+    
     
 
     let OrderSummaryJsx = <Spinner />;
@@ -117,17 +126,11 @@ const BurgerBuilder = (props: Props) => {
             const copy = { ...ingredients };
             copy[what] = Math.max(ingredients[what] - 1, 0);
             ingredientsUpdate(copy);
-            updatePriceState(copy);
-            updateIngredientLessEnabling(copy);
-            updatePurchasableState(copy);
         };
         const moreClicked = (what: keyof Ingredients) => {
             const copy = { ...ingredients };
             copy[what] = ingredients[what] + 1;
             ingredientsUpdate(copy);
-            updatePriceState(copy);
-            updateIngredientLessEnabling(copy);
-            updatePurchasableState(copy);
         };
 
         if (!isSummaryLoading) {
