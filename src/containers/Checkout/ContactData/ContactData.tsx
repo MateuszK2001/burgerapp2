@@ -1,11 +1,13 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.module.css';
 import AxiosOrders from '../../../axios-orders';
 import { useHistory } from 'react-router-dom';
 import { Ingredients } from '../../BurgerBuilder/BurgerBuilder';
 import Spinner from '../../../components/UI/Spinner/Spinner';
-import Input from '../../../components/UI/Input/Input';
+import { Validation } from '../../../components/UI/Form/Validation/Validation';
+import InputSelect, { Option } from '../../../components/UI/Form/Inputs/InputSelect/InputSelect';
+import InputText from '../../../components/UI/Form/Inputs/InputText/InputText';
 
 interface Props {
     ingredients: Ingredients;
@@ -18,112 +20,103 @@ interface Address {
 }
 
 
-interface Validation{
-    required?:boolean;
-    minLength?:number;
-    maxLength?:number;
+interface InputElement{
+    elementConfig:any,
+    value: string,
+    valid:boolean,
+    validation?:Validation,
 }
 
-interface OrderElement{
-    elementType: 'input'|'textarea'|'select',
-    elementConfig:Object,
+interface SelectElement{
+    elementConfig:any,
     value: string,
-    validation?:Validation,
-    valid:boolean,
-    touched: boolean
+    valid: boolean;
+    options: Option[];
 }
+function isInputOrSelect(o:InputElement|SelectElement):o is InputElement{
+    return !('options' in o);
+}
+
+
 interface OrderForm{
-    name:OrderElement,
-    street:OrderElement,
-    zipCode:OrderElement,
-    country:OrderElement,
-    email:OrderElement,
-    deliveryMethod:OrderElement,
-    
+    name:InputElement,
+    street:InputElement,
+    zipCode:InputElement,
+    country:InputElement,
+    email:InputElement,
+    deliveryMethod:SelectElement,
 }
 
 const ContactData = (props: Props) => {
     const [isValid, isValidUpdate] = useState(false);
     const [orderForm, orderFormUpdate] = useState({
         name:{
-            elementType: 'input',
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Name'
             },
             value: '',
+            valid:false,
             validation:{
                 required: true,
             },
-            valid:false,
-            touched: false
         },
         street:{
-            elementType: 'input',
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Street'
             },
             value: '',
+            valid:false,
             validation:{
                 required: true,
             },
-            valid:false,
-            touched: false
         },
         zipCode:{
-            elementType: 'input',
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Zip Code'
             },
             value: '',
+            valid:false,
             validation:{
                 required: true,
                 minLength: 5,
                 maxLength: 5
             },
-            valid:false,
-            touched: false
         },
         country:{
-            elementType: 'input',
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Country'
             },
             value: '',
+            valid:false,
             validation:{
                 required: true,
             },
-            valid:false,
-            touched: false
         },
         email:{
-            elementType: 'input',
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your E-Mail'
             },
             value: '',
+            valid:false,
             validation:{
                 required: true,
             },
-            valid:false,
-            touched: false
         },
 
         deliveryMethod:{
-            elementType: 'select',
             elementConfig: {
-                options:[
-                    {value: 'fastest', displayValue: 'Fastest'},
-                    {value: 'cheapest', displayValue: 'Cheapest'},
-                ]
             },
+            options:[
+                {value: 'fastest', displayValue: 'Fastest'},
+                {value: 'cheapest', displayValue: 'Cheapest'},
+            ],
             value: 'fastest',
-            valid:false,
-            touched: false
+            valid:true,
         },
         
 
@@ -157,62 +150,51 @@ const ContactData = (props: Props) => {
     }
 
     
-    const checkValidity=(value:string, rules:Validation)=>{
-        let isValid = true;
-        if(rules.required){
-            if(value.trim() === '')
-                isValid = false;
-        }
-        if(rules.minLength){
-            if(value.length < rules.minLength)
-                isValid = false;
-        }
-        if(rules.maxLength){
-            if(value.length > rules.maxLength)
-                isValid = false;
-        }
-        return isValid;
-    }
-    const changeFormValidity = (updatedForm:OrderForm)=>{
-        const valid = Object.values(updatedForm).reduce((isFormValid:boolean, element:OrderElement)=>{
-            if(!element.validation)
-                return isFormValid;
+    useEffect(()=>{
+        const valid = Object.values(orderForm).reduce((isFormValid:boolean, element:InputElement|SelectElement)=>{
             return isFormValid&&element.valid;
         }, true);
-        if(valid !== isValid){
-            isValidUpdate(valid);
-        }
-        console.log(valid);
+        isValidUpdate(valid);
         
-    };
-    const inputChangedHandler = (id:keyof OrderForm, event:React.FormEvent<HTMLInputElement>)=>{
-        const updatedForm = {...orderForm};
-        updatedForm[id].value = event.currentTarget.value;
-        updatedForm[id].touched = true;
-        if(updatedForm[id].validation)
-            updatedForm[id].valid = checkValidity(updatedForm[id].value, updatedForm[id].validation as Validation);
-        orderFormUpdate(updatedForm);
-        changeFormValidity(updatedForm);
+    }, [orderForm]); /// updating form validity
 
-        console.log(`${id}: ${event.currentTarget.value}`);
-        console.log(`valid: ${updatedForm[id].valid}`);
+    const inputChangedHandler = (id:keyof OrderForm, value:string)=>{
+        const updatedForm = {...orderForm};
+        updatedForm[id].value = value;
+        orderFormUpdate(updatedForm);
+    }
+    const validityChangedHandler = (id:keyof OrderForm, valid:boolean)=>{
+        const updatedForm = {...orderForm};
+        updatedForm[id].valid = valid;
+        orderFormUpdate(updatedForm);
     }
     
     let form = (
         <form onSubmit={orderSubmitHandler}>
             {
-                Object.entries(orderForm).map(([idx, el] :[string, OrderElement])=>{
+                Object.entries(orderForm).map(([idx, el] :[string, InputElement|SelectElement])=>{
                     return (
-                        <Input
-                            key={idx} 
-                            elementConfig={el.elementConfig} 
-                            elementType={el.elementType}
-                            value={el.value}
-                            invalid={!el.valid}
-                            shouldValidate={el.validation !== undefined}
-                            touched={el.touched}
-                            changed={inputChangedHandler.bind(null, idx as keyof OrderForm)}
-                        />
+                        isInputOrSelect(el)
+                        ?(
+                            <InputText
+                                key={idx} 
+                                elementConfig={el.elementConfig} 
+                                value={el.value}
+                                validation={el.validation}
+                                valueChanged={(val)=>inputChangedHandler(idx as keyof OrderForm, val)}
+                                validChanged={(valid)=>validityChangedHandler(idx as keyof OrderForm, valid)}
+                            />
+                        )
+                        :(
+                            <InputSelect
+                                key={idx} 
+                                elementConfig={el.elementConfig} 
+                                value={el.value}
+                                options={el.options}
+                                valueChanged={(val)=>inputChangedHandler(idx as keyof OrderForm, val)}
+                                validChanged={(valid)=>validityChangedHandler(idx as keyof OrderForm, valid)}
+                            />
+                        )
                     );
                 })
             }
