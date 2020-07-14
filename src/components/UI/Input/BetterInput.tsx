@@ -13,7 +13,7 @@ interface Props {
     shouldValidate:boolean;
 }
 
-const Input = (props: Props) => {
+const BetterInput = (props: Props) => {
     const inputClasses =  [classes.InputElement];
 
     if(props.invalid && props.shouldValidate && props.touched){
@@ -69,4 +69,4 @@ const Input = (props: Props) => {
     );
 };
 
-export default Input;
+export default BetterInput;
