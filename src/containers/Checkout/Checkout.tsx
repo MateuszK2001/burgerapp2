@@ -1,42 +1,42 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import CheckoutSummary from '../../components/Order/CheckoutSummary/CheckoutSummary';
-import { Ingredients } from '../BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../store/types/Ingredients";
 import { useHistory, useLocation, Route, withRouter, RouteComponentProps } from 'react-router-dom';
 import ContactData from './ContactData/ContactData';
+import { connect } from 'react-redux';
+import { State } from '../../store/reducer';
+import Actions from '../../store/actions';
 //import classes from'./Checkout.module.css';
 
 interface Props{
+    ingredients:Ingredients;
+    setIngredients:(ingredients:Ingredients)=>void;
 }
 const Checkout = (props:Props&RouteComponentProps)=>{
     const history = useHistory();
     const location = useLocation();
-    const [ingredients, ingredientsUpdate] = useState({
-        bacon: 0,
-        cheese: 0,
-        meat: 0,
-        salad: 0
-    } as Ingredients);
-    const [price, priceUpdate] = useState(0);
+    const ingredients = props.ingredients;
+    // const setIngredients = useCallback(props.setIngredients, []);
     
-    useEffect(()=>{
-        const query = new URLSearchParams(location.search);
-        const ingredientsNew = {
-            bacon: 0,
-            cheese: 0,
-            meat: 0,
-            salad: 0
-        };
-        for(const [key, val] of query.entries()){
-            if(key === 'price'){
-                priceUpdate(Number(val));
-            }
-            else{
-                ingredientsNew[key as keyof Ingredients] = Number(val);
-            }
-        }        
+    // useEffect(()=>{
+    //     const query = new URLSearchParams(location.search);
+    //     const ingredientsNew = {
+    //         bacon: 0,
+    //         cheese: 0,
+    //         meat: 0,
+    //         salad: 0
+    //     };
+    //     for(const [key, val] of query.entries()){
+    //         if(key === 'price'){
+    //             priceUpdate(Number(val));
+    //         }
+    //         else{
+    //             ingredientsNew[key as keyof Ingredients] = Number(val);
+    //         }
+    //     }        
 
-        ingredientsUpdate(ingredientsNew);
-    }, [location]);
+    //     ingredientsUpdate(ingredientsNew);
+    // }, [location]);
     return(
         <div>
             <CheckoutSummary 
@@ -44,10 +44,21 @@ const Checkout = (props:Props&RouteComponentProps)=>{
                 checkoutCancelled={()=>history.goBack() }
                 checkoutContinued={()=>{history.replace('/checkout/contact-data'+location.search)}} 
             />
-            <Route path={props.match.path+'/contact-data'}  render={()=><ContactData ingredients={ingredients} price={price}/>} />
+            <Route path={props.match.path+'/contact-data'}  component={ContactData} />
         </div>
         
     );
 };
+const stateToProps=(state:State)=>{
+    return{
+        ingredients: state.ingredients,
+        price:state.price
+    }
+};
+const dispatchToProps=(dispatch:any)=>{
+    return{
+        setIngredients:(ingredients:Ingredients)=>dispatch({type:Actions.SET_INGREDIENTS, ingredients:ingredients})
+    };
+}
 
-export default withRouter(Checkout);
+export default connect(stateToProps, dispatchToProps)(withRouter(Checkout));

@@ -1,7 +1,7 @@
 import React from 'react';
 import classes from './BuildControls.module.css';
 import BuildControl from './BuildControl/BuildControl';
-import {Ingredients} from '../../../containers/BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../../store/types/Ingredients";
 import {ingredientsLabels} from '../../../containers/BurgerBuilder/BurgerBuilder';
 
 

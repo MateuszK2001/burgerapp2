@@ -1,7 +1,7 @@
 import React from 'react';
 import classes from './Burger.module.css';
 import BurgerIngredient from './BurgerIngredient/BurgerIngredient';
-import {Ingredients} from '../../containers/BurgerBuilder/BurgerBuilder'; 
+import { Ingredients } from "../../store/types/Ingredients";
 export interface Props{
     ingredients: Ingredients;
 }

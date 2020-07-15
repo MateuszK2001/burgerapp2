@@ -1,7 +1,7 @@
 import React from 'react';
 import classes from './CheckoutSummary.module.css';
 import Burger from '../../Burger/Burger';
-import { Ingredients } from '../../../containers/BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../../store/types/Ingredients";
 import Button from '../../UI/Button/Button';
 
 interface Props {
@@ -17,16 +17,22 @@ const CheckoutSummary =  (props: Props) => {
             <div style={{ width: '100%', margin: 'auto' }}>
                 <Burger ingredients={props.ingredients} />
             </div>
-            <Button
-                btnType='Danger'
-                clicked={props.checkoutCancelled}>
-                    CANCEL
-            </Button>
-            <Button
-                btnType='Success'
-                clicked={props.checkoutContinued}>
-                    CONTINUE
-            </Button>
+            <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    margin: '15px 0px 40px 0px'
+                }}>
+                <Button
+                    btnType='Danger'
+                    clicked={props.checkoutCancelled}>
+                        CANCEL
+                </Button>
+                <Button
+                    btnType='Success'
+                    clicked={props.checkoutContinued}>
+                        CONTINUE
+                </Button>
+            </div>
         </div>
     )
 };

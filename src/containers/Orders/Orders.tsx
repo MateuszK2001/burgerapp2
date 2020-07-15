@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Order from '../../components/Order/Order';
 import AxiosOrders from '../../axios-orders';
 import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
-import { Ingredients } from '../BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../store/types/Ingredients";
 import Spinner from '../../components/UI/Spinner/Spinner';
 //import classes from'./Orders.module.css';
 

@@ -3,21 +3,19 @@ import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.module.css';
 import AxiosOrders from '../../../axios-orders';
 import { useHistory } from 'react-router-dom';
-import { Ingredients } from '../../BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../../store/types/Ingredients";
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import { Validation } from '../../../components/UI/Form/Validation/Validation';
 import InputSelect, { Option } from '../../../components/UI/Form/Inputs/InputSelect/InputSelect';
 import InputText from '../../../components/UI/Form/Inputs/InputText/InputText';
+import { State } from '../../../store/reducer';
+import { connect } from 'react-redux';
 
 interface Props {
     ingredients: Ingredients;
     price: number;
 }
 
-interface Address {
-    street: string,
-    zipCode: string,
-}
 
 
 interface InputElement{
@@ -213,4 +211,11 @@ const ContactData = (props: Props) => {
     );
 };
 
-export default ContactData;
+const stateToProps=(state:State)=>{
+    return{
+        ingredients: state.ingredients,
+        price:state.price
+    }
+};
+
+export default connect(stateToProps)(ContactData);

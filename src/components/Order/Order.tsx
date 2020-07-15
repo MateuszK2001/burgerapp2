@@ -1,6 +1,7 @@
 import React from 'react';
 import classes from './Order.module.css';
-import { Ingredients, ingredientsLabels } from '../../containers/BurgerBuilder/BurgerBuilder';
+import { ingredientsLabels } from '../../containers/BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../store/types/Ingredients";
 
 interface Props {
     ingredients: Ingredients;

@@ -1,5 +1,5 @@
 import React, {Fragment} from 'react';
-import {Ingredients} from '../../../containers/BurgerBuilder/BurgerBuilder';
+import { Ingredients } from "../../../store/types/Ingredients";
 import {ingredientsLabels} from '../../../containers/BurgerBuilder/BurgerBuilder';
 import Button from '../../UI/Button/Button';
 
