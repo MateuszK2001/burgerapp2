@@ -20,7 +20,7 @@ const Orders = (props: Props) => {
     const [loading, loadingUpdate] = useState(true);
     const [orders, ordersUpdate] = useState([] as Order[]);
     useEffect(() => {
-        AxiosOrders.get('/oders.json')
+        AxiosOrders.get('/orders.json')
             .then(res=>{
                 console.log(res);
                 const fetchedOrders = Object.entries(res.data).map(([key, val])=>{

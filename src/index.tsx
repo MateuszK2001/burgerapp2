@@ -2,13 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { createStore } from 'redux';
-import reducer from './store/reducer';
+import { createStore, applyMiddleware } from 'redux';
+import reducer from './store/reducers/reducer1';
 import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import ActionTypes from './store/actions/actionTypes';
 
+const actionTypeEnumToString = (action: any): any => typeof action.type === 'number' && ActionTypes[action.type] ? ({
+  type: ActionTypes[action.type],
+  payload: action.payload,
+}) : action;
+const composeEnhancers = composeWithDevTools({ actionSanitizer: actionTypeEnumToString });
 
-
-const store = createStore(reducer);
+const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
 
 ReactDOM.render(
   <React.StrictMode>

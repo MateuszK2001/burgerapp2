@@ -9,8 +9,8 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Ingredients } from "../../store/types/Ingredients";
-import { State } from '../../store/reducer';
-import Actions from '../../store/actions';
+import { State } from '../../store/reducers/reducer1';
+import Actions1 from '../../store/actions/actions1';
 
 export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
     { label: 'Salad', type: 'salad' },
@@ -21,7 +21,7 @@ export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
 
 export interface Props {
     ingredients:Ingredients;
-    setIngredients: (ingredients:Ingredients)=>void;
+    fetchIngredients: ()=>Promise<void>;
     addIngredient: (ingredientType:keyof Ingredients) => void;
     removeIngredient: (ingredientType:keyof Ingredients) => void;
     purchasable: boolean;
@@ -39,15 +39,17 @@ const BurgerBuilder = (props: Props) => {
     const ingredients = props.ingredients;
     const purchasable = props.purchasable;
     const price = props.price;
-    const setIngredients = useCallback(props.setIngredients, []);
+    const fetchIngredients = useCallback(props.fetchIngredients, []);
     const addIngredient = useCallback(props.addIngredient, []);
     const removeIngredient = useCallback(props.removeIngredient, []);
-
     const [purchasing, purchasingUpdate] = useState(false);
+    const [fetchingIngredients, fetchingIngredientsUpdate] = useState(true);
     const [canRemoveIngredient, canRemoveIngredientUpdate] = useState(
         Object.fromEntries(INGREDIENT_NAMES
             .map(name => [name, false])) as IngredientBoolean
     );
+
+
     const history = useHistory();
 
     useEffect(()=>{ /// lessBtn dis/enabling
@@ -61,12 +63,11 @@ const BurgerBuilder = (props: Props) => {
 
 
     useEffect(() => {
-        AxiosOrders.get('/ingredients.json')
-            .then(response => {
-                setIngredients(response.data);
-            })
-            .catch(err=>{})
-    }, [setIngredients]);
+        fetchIngredients()
+            .then(()=>{
+                fetchingIngredientsUpdate(false);
+        });
+    }, [fetchIngredients]);
 
     const purchaseCanceledHandler = () => {
         purchasingUpdate(false);
@@ -96,7 +97,7 @@ const BurgerBuilder = (props: Props) => {
 
     let BurgerJsx = <Spinner />;
 
-    if (ingredients !== null) {
+    if (!fetchingIngredients) {
         const lessClicked = (what: keyof Ingredients) => {
             removeIngredient(what);
         };
@@ -138,15 +139,14 @@ const stateToProps=(state:State)=>{
     return{
         ingredients: state.ingredients,
         purchasable: state.purchasable,
-        price: state.price
+        price: state.price,
     }
 };
 const dispatchToProps=(dispatch:any)=>{
     return{
-        setIngredients: (ingredients:Ingredients) => dispatch({type: Actions.SET_INGREDIENTS, ingredients:ingredients}),
-        addIngredient: (ingredientType:keyof Ingredients) => dispatch({type: Actions.ADD_INGREDIENT, ingredientType:ingredientType}),
-        removeIngredient: (ingredientType:keyof Ingredients) => dispatch({type: Actions.REMOVE_INGREDIENT, ingredientType:ingredientType}),
+        fetchIngredients: () => dispatch(Actions1.fetchIngredients()),
+        addIngredient: (ingredientType:keyof Ingredients) => dispatch(Actions1.addIngredient(ingredientType)),
+        removeIngredient: (ingredientType:keyof Ingredients) => dispatch(Actions1.removeIngredient(ingredientType)),
     };
 }
-
-export default connect(stateToProps, dispatchToProps)(withErrorHandler(BurgerBuilder, AxiosOrders));
+export default withErrorHandler(connect(stateToProps, dispatchToProps)(BurgerBuilder), AxiosOrders);

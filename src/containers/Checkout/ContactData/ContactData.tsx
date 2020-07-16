@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.module.css';
 import AxiosOrders from '../../../axios-orders';
@@ -8,8 +8,9 @@ import Spinner from '../../../components/UI/Spinner/Spinner';
 import { Validation } from '../../../components/UI/Form/Validation/Validation';
 import InputSelect, { Option } from '../../../components/UI/Form/Inputs/InputSelect/InputSelect';
 import InputText from '../../../components/UI/Form/Inputs/InputText/InputText';
-import { State } from '../../../store/reducer';
+import { State } from '../../../store/reducers/reducer1';
 import { connect } from 'react-redux';
+import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
 
 interface Props {
     ingredients: Ingredients;
@@ -18,105 +19,105 @@ interface Props {
 
 
 
-interface InputElement{
-    elementConfig:any,
+interface InputElement {
+    elementConfig: any,
     value: string,
-    valid:boolean,
-    validation?:Validation,
+    valid: boolean,
+    validation?: Validation,
 }
 
-interface SelectElement{
-    elementConfig:any,
+interface SelectElement {
+    elementConfig: any,
     value: string,
     valid: boolean;
     options: Option[];
 }
-function isInputOrSelect(o:InputElement|SelectElement):o is InputElement{
+function isInputOrSelect(o: InputElement | SelectElement): o is InputElement {
     return !('options' in o);
 }
 
 
-interface OrderForm{
-    name:InputElement,
-    street:InputElement,
-    zipCode:InputElement,
-    country:InputElement,
-    email:InputElement,
-    deliveryMethod:SelectElement,
+interface OrderForm {
+    name: InputElement,
+    street: InputElement,
+    zipCode: InputElement,
+    country: InputElement,
+    email: InputElement,
+    deliveryMethod: SelectElement,
 }
 
 const ContactData = (props: Props) => {
     const [isValid, isValidUpdate] = useState(false);
     const [orderForm, orderFormUpdate] = useState({
-        name:{
+        name: {
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Name'
             },
             value: '',
-            valid:false,
-            validation:{
+            valid: false,
+            validation: {
                 required: true,
             },
         },
-        street:{
+        street: {
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Street'
             },
             value: '',
-            valid:false,
-            validation:{
+            valid: false,
+            validation: {
                 required: true,
             },
         },
-        zipCode:{
+        zipCode: {
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Zip Code'
             },
             value: '',
-            valid:false,
-            validation:{
+            valid: false,
+            validation: {
                 required: true,
                 minLength: 5,
                 maxLength: 5
             },
         },
-        country:{
+        country: {
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your Country'
             },
             value: '',
-            valid:false,
-            validation:{
+            valid: false,
+            validation: {
                 required: true,
             },
         },
-        email:{
+        email: {
             elementConfig: {
                 type: 'text',
                 placeholder: 'Your E-Mail'
             },
             value: '',
-            valid:false,
-            validation:{
+            valid: false,
+            validation: {
                 required: true,
             },
         },
 
-        deliveryMethod:{
+        deliveryMethod: {
             elementConfig: {
             },
-            options:[
-                {value: 'fastest', displayValue: 'Fastest'},
-                {value: 'cheapest', displayValue: 'Cheapest'},
+            options: [
+                { value: 'fastest', displayValue: 'Fastest' },
+                { value: 'cheapest', displayValue: 'Cheapest' },
             ],
             value: 'fastest',
-            valid:true,
+            valid: true,
         },
-        
+
 
     } as OrderForm);
     const [loading, loadingUpdate] = useState(false);
@@ -130,12 +131,12 @@ const ContactData = (props: Props) => {
         const order = {
             price: props.price,
             ingredients: props.ingredients,
-            orderData: Object.fromEntries(Object.keys(orderForm).map(name=>{
+            orderData: Object.fromEntries(Object.keys(orderForm).map(name => {
                 return [name, orderForm[name as keyof OrderForm].value];
             })),
         }
         loadingUpdate(true);
-        AxiosOrders.post('/oders.json', order)
+        AxiosOrders.post('/orders.json', order)
             .then(response => {
                 console.log(response);
                 loadingUpdate(false);
@@ -147,56 +148,56 @@ const ContactData = (props: Props) => {
             });
     }
 
-    
-    useEffect(()=>{
-        const valid = Object.values(orderForm).reduce((isFormValid:boolean, element:InputElement|SelectElement)=>{
-            return isFormValid&&element.valid;
+
+    useEffect(() => {
+        const valid = Object.values(orderForm).reduce((isFormValid: boolean, element: InputElement | SelectElement) => {
+            return isFormValid && element.valid;
         }, true);
         isValidUpdate(valid);
-        
+
     }, [orderForm]); /// updating form validity
 
-    const inputChangedHandler = (id:keyof OrderForm, value:string)=>{
-        const updatedForm = {...orderForm};
+    const inputChangedHandler = (id: keyof OrderForm, value: string) => {
+        const updatedForm = { ...orderForm };
         updatedForm[id].value = value;
         orderFormUpdate(updatedForm);
     }
-    const validityChangedHandler = (id:keyof OrderForm, valid:boolean)=>{
-        const updatedForm = {...orderForm};
+    const validityChangedHandler = (id: keyof OrderForm, valid: boolean) => {
+        const updatedForm = { ...orderForm };
         updatedForm[id].valid = valid;
         orderFormUpdate(updatedForm);
     }
-    
+
     let form = (
         <form onSubmit={orderSubmitHandler}>
             {
-                Object.entries(orderForm).map(([idx, el] :[string, InputElement|SelectElement])=>{
+                Object.entries(orderForm).map(([idx, el]: [string, InputElement | SelectElement]) => {
                     return (
                         isInputOrSelect(el)
-                        ?(
-                            <InputText
-                                key={idx} 
-                                elementConfig={el.elementConfig} 
-                                value={el.value}
-                                validation={el.validation}
-                                valueChanged={(val)=>inputChangedHandler(idx as keyof OrderForm, val)}
-                                validChanged={(valid)=>validityChangedHandler(idx as keyof OrderForm, valid)}
-                            />
-                        )
-                        :(
-                            <InputSelect
-                                key={idx} 
-                                elementConfig={el.elementConfig} 
-                                value={el.value}
-                                options={el.options}
-                                valueChanged={(val)=>inputChangedHandler(idx as keyof OrderForm, val)}
-                                validChanged={(valid)=>validityChangedHandler(idx as keyof OrderForm, valid)}
-                            />
-                        )
+                            ? (
+                                <InputText
+                                    key={idx}
+                                    elementConfig={el.elementConfig}
+                                    value={el.value}
+                                    validation={el.validation}
+                                    valueChanged={(val) => inputChangedHandler(idx as keyof OrderForm, val)}
+                                    validChanged={(valid) => validityChangedHandler(idx as keyof OrderForm, valid)}
+                                />
+                            )
+                            : (
+                                <InputSelect
+                                    key={idx}
+                                    elementConfig={el.elementConfig}
+                                    value={el.value}
+                                    options={el.options}
+                                    valueChanged={(val) => inputChangedHandler(idx as keyof OrderForm, val)}
+                                    validChanged={(valid) => validityChangedHandler(idx as keyof OrderForm, valid)}
+                                />
+                            )
                     );
                 })
             }
-            <Button btnType='Success' disabled={!isValid} clicked={()=>{}}>ORDER</Button>
+            <Button btnType='Success' disabled={!isValid} clicked={() => { }}>ORDER</Button>
         </form>
     );
     if (loading)
@@ -211,11 +212,11 @@ const ContactData = (props: Props) => {
     );
 };
 
-const stateToProps=(state:State)=>{
-    return{
+const stateToProps = (state: State) => {
+    return {
         ingredients: state.ingredients,
-        price:state.price
+        price: state.price
     }
 };
 
-export default connect(stateToProps)(ContactData);
+export default withErrorHandler(connect(stateToProps)(ContactData), AxiosOrders);

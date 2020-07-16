@@ -1,11 +1,11 @@
 import React from 'react';
 import CheckoutSummary from '../../components/Order/CheckoutSummary/CheckoutSummary';
 import { Ingredients } from "../../store/types/Ingredients";
-import { useHistory, useLocation, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation, Route, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import ContactData from './ContactData/ContactData';
 import { connect } from 'react-redux';
-import { State } from '../../store/reducer';
-import Actions from '../../store/actions';
+import { State } from '../../store/reducers/reducer1';
+import ActionTypes from '../../store/actions/actionTypes';
 //import classes from'./Checkout.module.css';
 
 interface Props{
@@ -39,6 +39,12 @@ const Checkout = (props:Props&RouteComponentProps)=>{
     // }, [location]);
     return(
         <div>
+            {
+                Object.values(ingredients).reduce((a, b)=>a+b,0)===0
+                    ? <Redirect to="/" />
+                    : null
+
+            }
             <CheckoutSummary 
                 ingredients={ingredients} 
                 checkoutCancelled={()=>history.goBack() }
@@ -57,7 +63,7 @@ const stateToProps=(state:State)=>{
 };
 const dispatchToProps=(dispatch:any)=>{
     return{
-        setIngredients:(ingredients:Ingredients)=>dispatch({type:Actions.SET_INGREDIENTS, ingredients:ingredients})
+        setIngredients:(ingredients:Ingredients)=>dispatch({type:ActionTypes.SET_INGREDIENTS, ingredients:ingredients})
     };
 }
 
