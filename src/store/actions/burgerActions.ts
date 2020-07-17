@@ -2,7 +2,7 @@ import { Ingredients } from "../types/Ingredients";
 import ActionTypes from "./actionTypes";
 import AxiosOrders from "../../axios-orders";
 
-var Actions1 ={
+var burgerActions ={
     fetchIngredients: ()=>{
         return (dispatch:any)=>{
             return AxiosOrders.get('/ingredients.json')
@@ -25,4 +25,4 @@ var Actions1 ={
     ),
 };
 
-export default Actions1;
+export default burgerActions;

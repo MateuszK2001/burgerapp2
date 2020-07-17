@@ -3,9 +3,12 @@ import { Validation } from '../../components/UI/Form/Validation/Validation';
 import InputText from '../../components/UI/Form/Inputs/InputText/InputText';
 import Button from '../../components/UI/Button/Button';
 import classes from'./Auth.module.css';
+import ActionTypes from '../../store/actions/actionTypes';
+import { authActions } from '../../store/actions/authActions';
+import { connect } from 'react-redux';
 
 interface Props {
-
+    auth: (email:string, pass:string)=>Promise<void>;
 }
 
 interface InputElement {
@@ -52,7 +55,6 @@ const Auth = (props: Props) => {
         },
     } as FormData);
 
-    console.log(formData.login);
     
 
     useEffect(() => {
@@ -74,9 +76,15 @@ const Auth = (props: Props) => {
         formDataUpdate(updatedForm);
     }
 
+    const submitHandler = (event:React.FormEvent)=>{
+        event.preventDefault();
+        props.auth(formData.login.value, formData.password.value)
+            .then(d => console.log("Signed up"))
+            .catch(err => console.log(`Error: ${err}`))
+    };
     return (
         <div className={classes.Auth}>
-            <form>
+            <form onSubmit={submitHandler}>
                 {
 
                     Object.entries(formData).map(([idx, el]: [string, InputElement]) => (
@@ -95,5 +103,9 @@ const Auth = (props: Props) => {
         </div>
     )
 };
-
-export default Auth;
+const dispatchToProps = (dispatch:any)=>{
+    return{
+        auth: (email:string, pass:string)=>dispatch(authActions.auth(email, pass))
+    }
+};
+export default connect(null, dispatchToProps)(Auth);

@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Ingredients } from "../../store/types/Ingredients";
 import { State } from '../../store/reducers/reducer1';
-import Actions1 from '../../store/actions/actions1';
+import burgerActions from '../../store/actions/burgerActions';
 
 export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
     { label: 'Salad', type: 'salad' },
@@ -144,9 +144,9 @@ const stateToProps=(state:State)=>{
 };
 const dispatchToProps=(dispatch:any)=>{
     return{
-        fetchIngredients: () => dispatch(Actions1.fetchIngredients()),
-        addIngredient: (ingredientType:keyof Ingredients) => dispatch(Actions1.addIngredient(ingredientType)),
-        removeIngredient: (ingredientType:keyof Ingredients) => dispatch(Actions1.removeIngredient(ingredientType)),
+        fetchIngredients: () => dispatch(burgerActions.fetchIngredients()),
+        addIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.addIngredient(ingredientType)),
+        removeIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.removeIngredient(ingredientType)),
     };
 }
 export default withErrorHandler(connect(stateToProps, dispatchToProps)(BurgerBuilder), AxiosOrders);
