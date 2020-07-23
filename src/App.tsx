@@ -5,10 +5,7 @@ import BurgerBuilder from './containers/BurgerBuilder/BurgerBuilder';
 import Checkout from './containers/Checkout/Checkout';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Orders from './containers/Orders/Orders';
-import Button from './components/UI/Button/Button';
-import { authActions } from './store/actions/authActions';
 import Auth from './containers/Auth/Auth';
-import Axios from 'axios';
 
 
 function App() {

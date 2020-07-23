@@ -4,12 +4,13 @@ import { Ingredients } from "../../store/types/Ingredients";
 import { useHistory, useLocation, Route, withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
 import ContactData from './ContactData/ContactData';
 import { connect } from 'react-redux';
-import { State } from '../../store/reducers/reducer1';
 import ActionTypes from '../../store/actions/actionTypes';
+import { MergedState } from '../..';
 //import classes from'./Checkout.module.css';
 
 interface Props{
     ingredients:Ingredients;
+    purchased: boolean;
     setIngredients:(ingredients:Ingredients)=>void;
 }
 const Checkout = (props:Props&RouteComponentProps)=>{
@@ -37,13 +38,15 @@ const Checkout = (props:Props&RouteComponentProps)=>{
 
     //     ingredientsUpdate(ingredientsNew);
     // }, [location]);
+    
+    
+    
     return(
         <div>
             {
-                Object.values(ingredients).reduce((a, b)=>a+b,0)===0
+                props.purchased || Object.values(ingredients).reduce((a, b)=>a+b,0)===0
                     ? <Redirect to="/" />
                     : null
-
             }
             <CheckoutSummary 
                 ingredients={ingredients} 
@@ -55,15 +58,17 @@ const Checkout = (props:Props&RouteComponentProps)=>{
         
     );
 };
-const stateToProps=(state:State)=>{
+const stateToProps=(state:MergedState)=>{
     return{
-        ingredients: state.ingredients,
-        price:state.price
+        ingredients: state.burger.ingredients,
+        price:state.burger.price,
+        purchased: state.orders.purchased,
     }
 };
 const dispatchToProps=(dispatch:any)=>{
     return{
-        setIngredients:(ingredients:Ingredients)=>dispatch({type:ActionTypes.SET_INGREDIENTS, ingredients:ingredients})
+        setIngredients:(ingredients:Ingredients)=>dispatch({type:ActionTypes.SET_INGREDIENTS, ingredients:ingredients}),
+
     };
 }
 

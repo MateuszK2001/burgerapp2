@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Validation } from '../../components/UI/Form/Validation/Validation';
 import InputText from '../../components/UI/Form/Inputs/InputText/InputText';
 import Button from '../../components/UI/Button/Button';
-import classes from'./Auth.module.css';
-import ActionTypes from '../../store/actions/actionTypes';
+import classes from './Auth.module.css';
 import { authActions } from '../../store/actions/authActions';
 import { connect } from 'react-redux';
+import { MergedState } from '../..';
+import Spinner from '../../components/UI/Spinner/Spinner';
 
 interface Props {
-    auth: (email:string, pass:string)=>Promise<void>;
+    auth: (email: string, pass: string, isSignUp: boolean) => Promise<void>;
+    
+    errorMessage: string|null,
+    token: string|null,
+    userId: string|null
 }
 
 interface InputElement {
@@ -28,6 +33,7 @@ interface FormData {
 
 const Auth = (props: Props) => {
     const [isValid, isValidUpdate] = useState(false);
+    const [isSignUp, isSignUpUpdate] = useState(true);
     const [formData, formDataUpdate] = useState({
         login: {
             elementConfig: {
@@ -54,8 +60,9 @@ const Auth = (props: Props) => {
             },
         },
     } as FormData);
+    const [loading, loadingUpdate] = useState(false);
 
-    
+
 
     useEffect(() => {
         const valid = Object.values(formData).reduce((isFormValid: boolean, element: InputElement) => {
@@ -76,36 +83,56 @@ const Auth = (props: Props) => {
         formDataUpdate(updatedForm);
     }
 
-    const submitHandler = (event:React.FormEvent)=>{
+    const submitHandler = (event: React.FormEvent) => {
         event.preventDefault();
-        props.auth(formData.login.value, formData.password.value)
-            .then(d => console.log("Signed up"))
-            .catch(err => console.log(`Error: ${err}`))
+        loadingUpdate(true);
+        props.auth(formData.login.value, formData.password.value, isSignUp)
+            .then(() => loadingUpdate(false))
     };
+    const switchAuthModeHandler = () => {
+        isSignUpUpdate(!isSignUp);
+    };
+    let form = (
+        <form onSubmit={submitHandler}>
+            {
+                Object.entries(formData).map(([idx, el]: [string, InputElement]) => (
+                    <InputText
+                        key={idx}
+                        elementConfig={el.elementConfig}
+                        value={el.value}
+                        validation={el.validation}
+                        valueChanged={inputChangedHandler.bind(null, idx as keyof FormData)}
+                        validChanged={validityChangedHandler.bind(null, idx as keyof FormData)}
+                    />
+                ))
+            }
+            <Button btnType='Success' disabled={!isValid}>SUBMIT</Button>
+        </form>
+    );
+    if(loading)
+        form = <Spinner />
     return (
-        <div className={classes.Auth}>
-            <form onSubmit={submitHandler}>
-                {
-
-                    Object.entries(formData).map(([idx, el]: [string, InputElement]) => (
-                        <InputText
-                            key={idx}
-                            elementConfig={el.elementConfig}
-                            value={el.value}
-                            validation={el.validation}
-                            valueChanged={inputChangedHandler.bind(null,idx as keyof FormData)}
-                            validChanged={validityChangedHandler.bind(null,idx as keyof FormData)}
-                        />
-                    ))
-                }
-                <Button btnType='Success' disabled={!isValid} clicked={() => { }}>SUBMIT</Button>
-            </form>
-        </div>
+        <Fragment>
+            <div className={classes.Auth}>
+                {form}
+                <Button btnType='Danger' clicked={switchAuthModeHandler}>Switch to {isSignUp ? "Sign In" : "Sign Up"}</Button>
+            </div>
+            <p>{props.errorMessage}</p>
+            <p>token: {props.token} </p>
+            <p>userId: {props.userId} </p>
+        </Fragment>
     )
 };
-const dispatchToProps = (dispatch:any)=>{
+const stateToProps = (state:MergedState)=>{
     return{
-        auth: (email:string, pass:string)=>dispatch(authActions.auth(email, pass))
+        errorMessage: state.auth.error,
+        token: state.auth.token,
+        userId: state.auth.userId
     }
 };
-export default connect(null, dispatchToProps)(Auth);
+const dispatchToProps = (dispatch: any) => {
+    return {
+        auth: (email: string, pass: string, isSignUp: boolean) => dispatch(authActions.auth(email, pass, isSignUp?'signup':'signin'))
+    }
+};
+export default connect(stateToProps, dispatchToProps)(Auth);

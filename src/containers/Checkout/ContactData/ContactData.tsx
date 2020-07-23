@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../../components/UI/Button/Button';
 import classes from './ContactData.module.css';
 import AxiosOrders from '../../../axios-orders';
-import { useHistory } from 'react-router-dom';
 import { Ingredients } from "../../../store/types/Ingredients";
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import { Validation } from '../../../components/UI/Form/Validation/Validation';
 import InputSelect, { Option } from '../../../components/UI/Form/Inputs/InputSelect/InputSelect';
 import InputText from '../../../components/UI/Form/Inputs/InputText/InputText';
-import { State } from '../../../store/reducers/reducer1';
 import { connect } from 'react-redux';
 import withErrorHandler from '../../../hoc/withErrorHandler/withErrorHandler';
+import { MergedState } from '../../../index';
+import { ordersActions } from '../../../store/actions/ordersActions';
 
 interface Props {
     ingredients: Ingredients;
     price: number;
+    token: string|null;
+    loading: boolean;
+    purchase: (token:string, order:any)=>Promise<void>;
 }
 
 
@@ -120,14 +123,11 @@ const ContactData = (props: Props) => {
 
 
     } as OrderForm);
-    const [loading, loadingUpdate] = useState(false);
 
-    const history = useHistory();
 
     const orderSubmitHandler = (event: React.FormEvent<HTMLElement>) => {
         event.preventDefault();
 
-        console.log(props.ingredients);
         const order = {
             price: props.price,
             ingredients: props.ingredients,
@@ -135,19 +135,9 @@ const ContactData = (props: Props) => {
                 return [name, orderForm[name as keyof OrderForm].value];
             })),
         }
-        loadingUpdate(true);
-        AxiosOrders.post('/orders.json', order)
-            .then(response => {
-                console.log(response);
-                loadingUpdate(false);
-                history.push('/');
-            })
-            .catch((err) => {
-                console.log(err);
-                loadingUpdate(false);
-            });
-    }
 
+        props.purchase(props.token ? props.token : "", order);
+    }
 
     useEffect(() => {
         const valid = Object.values(orderForm).reduce((isFormValid: boolean, element: InputElement | SelectElement) => {
@@ -200,7 +190,7 @@ const ContactData = (props: Props) => {
             <Button btnType='Success' disabled={!isValid} clicked={() => { }}>ORDER</Button>
         </form>
     );
-    if (loading)
+    if (props.loading)
         form = <Spinner />
 
 
@@ -212,11 +202,18 @@ const ContactData = (props: Props) => {
     );
 };
 
-const stateToProps = (state: State) => {
+const stateToProps = (state: MergedState) => {
     return {
-        ingredients: state.ingredients,
-        price: state.price
+        ingredients: state.burger.ingredients,
+        price: state.burger.price,
+        token: state.auth.token,
+        loading: state.orders.loading
     }
 };
+const dispatchToProps = (dispatch:any)=>{
+    return {
+        purchase: (token:string, order:any)=>dispatch(ordersActions.purchase(token, order)),
+    };
+};
 
-export default withErrorHandler(connect(stateToProps)(ContactData), AxiosOrders);
+export default withErrorHandler(connect(stateToProps, dispatchToProps)(ContactData), AxiosOrders);

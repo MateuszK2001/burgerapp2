@@ -1,0 +1,5 @@
+2020/07/22-09:10:06.992 31c0 Reusing MANIFEST D:\Projects\burgerapp\.vscode\chrome\Default\IndexedDB\https_open.spotify.com_0.indexeddb.leveldb/MANIFEST-000001
+2020/07/22-10:12:17.689 4d5c Level-0 table #5: started
+2020/07/22-10:12:17.692 4d5c Level-0 table #5: 4925 bytes OK
+2020/07/22-10:12:17.694 4d5c Delete type=0 #3
+2020/07/22-10:12:17.695 4d5c Manual compaction at level-0 from (begin) .. (end); will stop at (end)

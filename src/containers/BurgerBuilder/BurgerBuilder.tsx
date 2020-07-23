@@ -9,8 +9,9 @@ import withErrorHandler from '../../hoc/withErrorHandler/withErrorHandler';
 import { useHistory } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { Ingredients } from "../../store/types/Ingredients";
-import { State } from '../../store/reducers/reducer1';
 import burgerActions from '../../store/actions/burgerActions';
+import { MergedState } from '.././../index';
+import { ordersActions } from '../../store/actions/ordersActions';
 
 export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
     { label: 'Salad', type: 'salad' },
@@ -26,6 +27,7 @@ export interface Props {
     removeIngredient: (ingredientType:keyof Ingredients) => void;
     purchasable: boolean;
     price: number;
+    purchaseInit: ()=>void;
     
 }
 
@@ -61,6 +63,10 @@ const BurgerBuilder = (props: Props) => {
         canRemoveIngredientUpdate(copy);
     }, [ingredients]);
 
+        const {purchaseInit} = props;
+    useEffect(() => {
+        purchaseInit();
+    }, [purchaseInit]);
 
     useEffect(() => {
         fetchIngredients()
@@ -135,11 +141,11 @@ const BurgerBuilder = (props: Props) => {
     );
 }
 
-const stateToProps=(state:State)=>{
+const stateToProps=(state:MergedState)=>{
     return{
-        ingredients: state.ingredients,
-        purchasable: state.purchasable,
-        price: state.price,
+        ingredients: state.burger.ingredients,
+        purchasable: state.burger.purchasable,
+        price: state.burger.price,
     }
 };
 const dispatchToProps=(dispatch:any)=>{
@@ -147,6 +153,7 @@ const dispatchToProps=(dispatch:any)=>{
         fetchIngredients: () => dispatch(burgerActions.fetchIngredients()),
         addIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.addIngredient(ingredientType)),
         removeIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.removeIngredient(ingredientType)),
+        purchaseInit: ()=>dispatch(ordersActions.purchaseInit()),
     };
 }
 export default withErrorHandler(connect(stateToProps, dispatchToProps)(BurgerBuilder), AxiosOrders);
