@@ -8,6 +8,7 @@ import Backdrop from '../../UI/Backdrop/Backdrop';
 interface Props{
     closed: ()=>void;
     isOpen: boolean;
+    isAuthenticated: boolean;
 }
 
 const SideDrawer = (props:Props)=>{
@@ -23,7 +24,7 @@ const SideDrawer = (props:Props)=>{
                     <Logo />
                 </div>
                 <nav>
-                    <NavigationItems />
+                    <NavigationItems isAuthenticated={props.isAuthenticated}/>
                 </nav>
             </div>
         </Fragment>

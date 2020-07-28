@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useLayoutEffect } from 'react';
 import { Validation } from '../../components/UI/Form/Validation/Validation';
 import InputText from '../../components/UI/Form/Inputs/InputText/InputText';
 import Button from '../../components/UI/Button/Button';
@@ -7,13 +7,16 @@ import { authActions } from '../../store/actions/authActions';
 import { connect } from 'react-redux';
 import { MergedState } from '../..';
 import Spinner from '../../components/UI/Spinner/Spinner';
+import { Redirect, useHistory } from 'react-router-dom';
 
 interface Props {
     auth: (email: string, pass: string, isSignUp: boolean) => Promise<void>;
     
     errorMessage: string|null,
     token: string|null,
-    userId: string|null
+    userId: string|null,
+    isAuthenticated: boolean;
+    redirectPath:string;
 }
 
 interface InputElement {
@@ -62,7 +65,7 @@ const Auth = (props: Props) => {
     } as FormData);
     const [loading, loadingUpdate] = useState(false);
 
-
+    const history = useHistory();
 
     useEffect(() => {
         const valid = Object.values(formData).reduce((isFormValid: boolean, element: InputElement) => {
@@ -72,6 +75,8 @@ const Auth = (props: Props) => {
 
     }, [formData]);
 
+
+    
     const inputChangedHandler = (id: keyof FormData, value: string) => {
         const updatedForm = { ...formData };
         updatedForm[id].value = value;
@@ -87,7 +92,10 @@ const Auth = (props: Props) => {
         event.preventDefault();
         loadingUpdate(true);
         props.auth(formData.login.value, formData.password.value, isSignUp)
-            .then(() => loadingUpdate(false))
+            .then(() => {
+                // loadingUpdate(false);
+                // history.push(props.redirectPath);
+            })
     };
     const switchAuthModeHandler = () => {
         isSignUpUpdate(!isSignUp);
@@ -111,8 +119,15 @@ const Auth = (props: Props) => {
     );
     if(loading)
         form = <Spinner />
+    
+    const redirect = props.isAuthenticated 
+            ? <Redirect to={props.redirectPath} />
+            :null;
+
+    
     return (
         <Fragment>
+            {redirect}
             <div className={classes.Auth}>
                 {form}
                 <Button btnType='Danger' clicked={switchAuthModeHandler}>Switch to {isSignUp ? "Sign In" : "Sign Up"}</Button>
@@ -127,12 +142,14 @@ const stateToProps = (state:MergedState)=>{
     return{
         errorMessage: state.auth.error,
         token: state.auth.token,
-        userId: state.auth.userId
+        userId: state.auth.userId,
+        isAuthenticated: state.auth.token!==null,
+        redirectPath: state.auth.redirectPath
     }
 };
 const dispatchToProps = (dispatch: any) => {
     return {
-        auth: (email: string, pass: string, isSignUp: boolean) => dispatch(authActions.auth(email, pass, isSignUp?'signup':'signin'))
+        auth: (email: string, pass: string, isSignUp: boolean) => dispatch(authActions.auth(email, pass, isSignUp?'signup':'signin')),
     }
 };
 export default connect(stateToProps, dispatchToProps)(Auth);

@@ -17,7 +17,8 @@ interface Props {
     price: number;
     token: string|null;
     loading: boolean;
-    purchase: (token:string, order:any)=>Promise<void>;
+    userId: string|null;
+    purchase: (token:string, userId:string, order:any)=>Promise<void>;
 }
 
 
@@ -136,7 +137,7 @@ const ContactData = (props: Props) => {
             })),
         }
 
-        props.purchase(props.token ? props.token : "", order);
+        props.purchase(props.token ? props.token : "", props.userId!, order);
     }
 
     useEffect(() => {
@@ -207,12 +208,13 @@ const stateToProps = (state: MergedState) => {
         ingredients: state.burger.ingredients,
         price: state.burger.price,
         token: state.auth.token,
-        loading: state.orders.loading
+        loading: state.orders.loading,
+        userId: state.auth.userId
     }
 };
 const dispatchToProps = (dispatch:any)=>{
     return {
-        purchase: (token:string, order:any)=>dispatch(ordersActions.purchase(token, order)),
+        purchase: (token:string, userId:string, order:any)=>dispatch(ordersActions.purchase(token, userId, order)),
     };
 };
 

@@ -4,23 +4,29 @@ import updateObject from "../utility";
 const initialState = {
     token: null,
     userId: null,
-    error:null
+    error:null,
+    redirectPath: '/'
 };
 export interface State {
     token: string | null,
     userId: string | null,
     error: string | null,
+    redirectPath: string
 }
 export interface Action {
     type: ActionTypes,
     token: string | null,
     userId: string | null,
     error: string | null,
-
+    path: string|null,
 }
 
 const authReducer = (state: State = initialState, action: Action) => {
     switch (action.type) {
+        case ActionTypes.SET_REDIRECT_PATH:
+            return updateObject(state,{
+                redirectPath: action.path
+            });
         case ActionTypes.AUTH_LOGOUT:
             return updateObject(state,{
                 token: null,

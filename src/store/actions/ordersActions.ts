@@ -3,10 +3,11 @@ import { Action } from "../reducers/ordersReducer";
 import ActionTypes from "./actionTypes";
 
 export var ordersActions = {
-    fetchOrders: (token:string)=>{
+    fetchOrders: (token:string, userId:string)=>{
         return (dispatch:any)=>{
             dispatch({type: ActionTypes.FETCH_ORDERS_START} as Action);
-            return AxiosOrders.get(`/orders.json?auth=${token}`)
+            const queryParams = `?auth=${token}`;
+            return AxiosOrders.get(`/orders/${userId}.json${queryParams}`)
                 .then(res=>{
                     const fetchedOrders = Object.entries(res.data).map(([key, val])=>{
                         return {id: key, ...(val as Object)};
@@ -24,12 +25,13 @@ export var ordersActions = {
                 })
         };
     },
-    purchase: (token:string, order:any)=>{
+    purchase: (token:string, userId:string, order:any)=>{
         return (dispatch:any)=>{
             console.log(order);
             dispatch({type: ActionTypes.PURCHASE_START} as Action);
             
-            return AxiosOrders.post(`/orders.json?auth=${token}`, order)
+            const queryParams = `?auth=${token}`;
+            return AxiosOrders.post(`/orders/${userId}.json`+queryParams, order)
                 .then(res=>{
                     dispatch({
                         type: ActionTypes.PURCHASE_SUCCESS,

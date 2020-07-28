@@ -13,17 +13,18 @@ interface Props {
     orders: OrderType[],
     loading: boolean,
     error: Error,
-    fetchOrders: (token:string)=>Promise<void>,
-    token: string|null
+    fetchOrders: (token:string, userId:string)=>Promise<void>,
+    token: string|null,
+    userId: string|null
 }
 
 const Orders = (props: Props) => {
-    const {token, fetchOrders} = props;
+    const {token, userId, fetchOrders} = props;
 
     useEffect(() => {
         if(token)
-            fetchOrders(token);        
-    }, [token, fetchOrders]);
+            fetchOrders(token, userId!);        
+    }, [token, userId, fetchOrders]);
     const ordersJsx = props.loading
         ? <Spinner />
         : props.orders.map( (order)=>(
@@ -44,12 +45,13 @@ const stateToProps = (state:MergedState)=>{
         orders: state.orders.orders,
         loading: state.orders.loading,
         error: state.orders.error,
-        token: state.auth.token
+        token: state.auth.token,
+        userId: state.auth.userId
     };
 };
 const dispatchToProps = (dispatch:any)=>{
     return{
-        fetchOrders: (token:string)=> dispatch(ordersActions.fetchOrders(token))
+        fetchOrders: (token:string, userId:string)=> dispatch(ordersActions.fetchOrders(token, userId))
     }
 };
 export default connect(stateToProps, dispatchToProps)(withErrorHandler(Orders, AxiosOrders));

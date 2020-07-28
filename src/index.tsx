@@ -3,13 +3,14 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
-import burgerReducer,{State as BurgerState} from './store/reducers/burgerReducer';
+import burgerReducer, { State as BurgerState } from './store/reducers/burgerReducer';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import ActionTypes from './store/actions/actionTypes';
-import authReducer,{State as AuthState} from './store/reducers/authReducer';
-import ordersReducer,{State as OrdersState} from './store/reducers/ordersReducer';
+import authReducer, { State as AuthState } from './store/reducers/authReducer';
+import ordersReducer, { State as OrdersState } from './store/reducers/ordersReducer';
+import { BrowserRouter } from 'react-router-dom';
 
 const actionTypeEnumToString = (action: any): any => typeof action.type === 'number' && ActionTypes[action.type] ? ({
   type: ActionTypes[action.type],
@@ -17,22 +18,25 @@ const actionTypeEnumToString = (action: any): any => typeof action.type === 'num
 }) : action;
 const composeEnhancers = composeWithDevTools({ actionSanitizer: actionTypeEnumToString });
 
-export interface MergedState{
+export interface MergedState {
   auth: AuthState,
   burger: BurgerState,
   orders: OrdersState
 }
 const store = createStore(combineReducers({
-  auth: authReducer, 
+  auth: authReducer,
   burger: burgerReducer,
-  orders: ordersReducer})
+  orders: ordersReducer
+})
   , composeEnhancers(applyMiddleware(thunk)));
 
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

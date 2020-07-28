@@ -14,6 +14,7 @@ enum ActionTypes{
     PURCHASE_START,
     PURCHASE_SUCCESS,
     PURCHASE_FAIL,
+    SET_REDIRECT_PATH,
 }
 
 

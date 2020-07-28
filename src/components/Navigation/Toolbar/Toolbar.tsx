@@ -6,6 +6,7 @@ import DrawerToggle from '../SideDrawer/DrawerToggle/DrawerToggle';
 
 interface Props{
     menuOpened: ()=>void;
+    isAuthenticated: boolean;
 }
 
 const Toolbar = (props:Props)=>(
@@ -15,7 +16,7 @@ const Toolbar = (props:Props)=>(
             <Logo />
         </div>
         <nav className={classes.DesktopOnly}>
-            <NavigationItems />
+            <NavigationItems  isAuthenticated={props.isAuthenticated}/>
         </nav>
     </header>
 );

@@ -1,20 +1,53 @@
 import ActionTypes from "./actionTypes";
 import Axios from "axios";
-import { Action as AuthAction } from "../reducers/authReducer";
+import { Action as AuthAction, Action } from "../reducers/authReducer";
 
 
 export var authActions = {
-    checkAuthTimeout: (expirationTime:number)=>{
+    checkAuthTimeout: (expirationTime:Date)=>{
+        const waitingMs = expirationTime.getTime() - new Date().getTime(); 
+        
         return (dispatch:any)=>{
             setTimeout(()=>{
                 dispatch(authActions.logout());
-            }, expirationTime*1000);
+            }, waitingMs);
         };
     },
-    logout: ()=>{
+    logout: ()=>{ 
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('expiration');
         return{
             type: ActionTypes.AUTH_LOGOUT
         }
+    },
+    setRedirectPath: (path:string)=>{
+        return {
+            type: ActionTypes.SET_REDIRECT_PATH,
+            path: path
+        } as Action
+    },
+    authCheckSate: ()=>{
+        return (dispatch:any)=>{
+            const token = localStorage.getItem('token');
+            const expirationTimeStr = localStorage.getItem('expiration');
+            const userId = localStorage.getItem('userId');
+            if(!token || !expirationTimeStr || !userId){
+                dispatch(authActions.logout());
+            }
+            else{
+                const expirationTime = new Date(expirationTimeStr);
+                if(expirationTime < new Date()){
+                    dispatch(authActions.logout());
+                }
+                dispatch({
+                    type: ActionTypes.AUTH_SUCCESSFUL,
+                    token: token,
+                    userId: userId
+                } as AuthAction);
+                dispatch(authActions.checkAuthTimeout(expirationTime));
+            }
+        };
     },
     auth: (email: string, password: string, method: 'signup' | 'signin' = 'signup') => {
         const apiKey = 'AIzaSyAYr_I7gFHoibWQnCss5xfY9KLjQIFzA9g';
@@ -31,12 +64,11 @@ export var authActions = {
                 })
                 .then(response => {
                     console.log(response.data);
-                    dispatch({
-                        type: ActionTypes.AUTH_SUCCESSFUL,
-                        token: response.data.idToken,
-                        userId: response.data.localId
-                    } as AuthAction);
-                    dispatch(authActions.checkAuthTimeout(response.data.expiresIn));
+                    localStorage.setItem('token', response.data.idToken);
+                    localStorage.setItem('expiration', 
+                        new Date(new Date().getTime() + (response.data.expiresIn as number) * 1000).toString());
+                    localStorage.setItem('userId', response.data.localId);
+                    dispatch(authActions.authCheckSate());
                 })
                 .catch(error => {
                     let errMsg = "";

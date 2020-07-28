@@ -12,6 +12,7 @@ import { Ingredients } from "../../store/types/Ingredients";
 import burgerActions from '../../store/actions/burgerActions';
 import { MergedState } from '.././../index';
 import { ordersActions } from '../../store/actions/ordersActions';
+import { authActions } from '../../store/actions/authActions';
 
 export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
     { label: 'Salad', type: 'salad' },
@@ -21,14 +22,15 @@ export const ingredientsLabels: { label: string, type: keyof Ingredients }[] = [
 ];
 
 export interface Props {
-    ingredients:Ingredients;
-    fetchIngredients: ()=>Promise<void>;
-    addIngredient: (ingredientType:keyof Ingredients) => void;
-    removeIngredient: (ingredientType:keyof Ingredients) => void;
+    ingredients: Ingredients;
+    fetchIngredients: () => Promise<void>;
+    addIngredient: (ingredientType: keyof Ingredients) => void;
+    removeIngredient: (ingredientType: keyof Ingredients) => void;
     purchasable: boolean;
     price: number;
-    purchaseInit: ()=>void;
-    
+    purchaseInit: () => void;
+    isAuthenticated: boolean;
+    setRedirectPath: (path: string) => void;
 }
 
 
@@ -54,52 +56,55 @@ const BurgerBuilder = (props: Props) => {
 
     const history = useHistory();
 
-    useEffect(()=>{ /// lessBtn dis/enabling
+    useEffect(() => { /// lessBtn dis/enabling
         const copy = Object.fromEntries(INGREDIENT_NAMES.map(name => [name, false])) as IngredientBoolean;
-        for(const name in ingredients){
+        for (const name in ingredients) {
             const cnt = ingredients[name as keyof Ingredients];
             copy[name as keyof Ingredients] = cnt >= 1;
         }
         canRemoveIngredientUpdate(copy);
     }, [ingredients]);
 
-        const {purchaseInit} = props;
+    const { purchaseInit } = props;
     useEffect(() => {
         purchaseInit();
     }, [purchaseInit]);
 
     useEffect(() => {
         fetchIngredients()
-            .then(()=>{
+            .then(() => {
                 fetchingIngredientsUpdate(false);
-        });
+            });
     }, [fetchIngredients]);
 
     const purchaseCanceledHandler = () => {
         purchasingUpdate(false);
     }
     const purchaseContinueHandler = () => {
-        // loadingUpdate(false);
         purchasingUpdate(false);
-        // const queryParams=Object.entries(ingredients as Ingredients).map(([key, val])=>{
-        //     return encodeURIComponent(key)+"="+encodeURIComponent(val);
-        // })
-        // queryParams.push('price='+price);
-
         history.push({
             pathname: '/checkout',
-            // search: '?'+queryParams.join('&')
         });
-        // loadingUpdate(true);
-        // purchasingUpdate(false);
     }
-    
+
 
     const orderBtnClicked = () => {
-        purchasingUpdate(true);
+        if (props.isAuthenticated) {
+            purchasingUpdate(true);
+        }
+        else {
+            props.setRedirectPath('/checkout');
+            history.push({
+                pathname: '/auth'
+            })
+        }
     };
-    
-    
+
+
+    const setRedirectPath = props.setRedirectPath;
+    useEffect(() => {
+        setRedirectPath('/');
+    }, [setRedirectPath]);
 
     let BurgerJsx = <Spinner />;
 
@@ -115,6 +120,7 @@ const BurgerBuilder = (props: Props) => {
             <Fragment>
                 <Burger ingredients={ingredients} />
                 <BuildControls
+                    isAuthenticated={props.isAuthenticated}
                     lessClicked={lessClicked}
                     moreClicked={moreClicked}
                     canRemoveIngredient={canRemoveIngredient}
@@ -125,7 +131,7 @@ const BurgerBuilder = (props: Props) => {
         );
     }
 
-    
+
 
     return (
         <Fragment>
@@ -141,19 +147,21 @@ const BurgerBuilder = (props: Props) => {
     );
 }
 
-const stateToProps=(state:MergedState)=>{
-    return{
+const stateToProps = (state: MergedState) => {
+    return {
         ingredients: state.burger.ingredients,
         purchasable: state.burger.purchasable,
         price: state.burger.price,
+        isAuthenticated: state.auth.token !== null
     }
 };
-const dispatchToProps=(dispatch:any)=>{
-    return{
+const dispatchToProps = (dispatch: any) => {
+    return {
         fetchIngredients: () => dispatch(burgerActions.fetchIngredients()),
-        addIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.addIngredient(ingredientType)),
-        removeIngredient: (ingredientType:keyof Ingredients) => dispatch(burgerActions.removeIngredient(ingredientType)),
-        purchaseInit: ()=>dispatch(ordersActions.purchaseInit()),
+        addIngredient: (ingredientType: keyof Ingredients) => dispatch(burgerActions.addIngredient(ingredientType)),
+        removeIngredient: (ingredientType: keyof Ingredients) => dispatch(burgerActions.removeIngredient(ingredientType)),
+        purchaseInit: () => dispatch(ordersActions.purchaseInit()),
+        setRedirectPath: (path: string) => dispatch(authActions.setRedirectPath(path))
     };
 }
 export default withErrorHandler(connect(stateToProps, dispatchToProps)(BurgerBuilder), AxiosOrders);
