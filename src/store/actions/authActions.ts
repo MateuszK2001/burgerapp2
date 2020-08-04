@@ -63,7 +63,6 @@ export var authActions = {
                     returnSecureToken: true
                 })
                 .then(response => {
-                    console.log(response.data);
                     localStorage.setItem('token', response.data.idToken);
                     localStorage.setItem('expiration', 
                         new Date(new Date().getTime() + (response.data.expiresIn as number) * 1000).toString());

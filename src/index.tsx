@@ -16,19 +16,23 @@ const actionTypeEnumToString = (action: any): any => typeof action.type === 'num
   type: ActionTypes[action.type],
   payload: action.payload,
 }) : action;
-const composeEnhancers = composeWithDevTools({ actionSanitizer: actionTypeEnumToString });
 
 export interface MergedState {
   auth: AuthState,
   burger: BurgerState,
   orders: OrdersState
 }
+
+const composeEnhancers= composeWithDevTools({ actionSanitizer: actionTypeEnumToString });
+const enhancer = (process.env.NODE_ENV === 'development' 
+  ? composeEnhancers(applyMiddleware(thunk))
+  : applyMiddleware(thunk)
+);
 const store = createStore(combineReducers({
   auth: authReducer,
   burger: burgerReducer,
   orders: ordersReducer
-})
-  , composeEnhancers(applyMiddleware(thunk)));
+}), enhancer );
 
 
 ReactDOM.render(

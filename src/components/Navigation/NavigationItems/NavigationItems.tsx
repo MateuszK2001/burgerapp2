@@ -4,17 +4,18 @@ import NavigationItem from './NavigationItem/NavigationItem';
 
 interface Props {
     isAuthenticated: boolean;
+    clicked?: ()=>void;
 }
 
 const NavigationItems = (props: Props) => (
     <ul className={classes.NavigationItems}>
-        <NavigationItem link="/">Burger Builder</NavigationItem>
+        <NavigationItem clicked={props.clicked} link="/">Burger Builder</NavigationItem>
         {props.isAuthenticated
-            ? <NavigationItem link="/orders">My Orders</NavigationItem>
+            ? <NavigationItem clicked={props.clicked} link="/orders">My Orders</NavigationItem>
             : null}
         {!props.isAuthenticated
-            ? <NavigationItem link="/auth">Authenticate</NavigationItem>
-            : <NavigationItem link="/logout">Logout</NavigationItem>
+            ? <NavigationItem clicked={props.clicked} link="/auth">Authenticate</NavigationItem>
+            : <NavigationItem clicked={props.clicked} link="/logout">Logout</NavigationItem>
         }
     </ul>
 );

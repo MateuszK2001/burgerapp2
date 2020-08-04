@@ -27,7 +27,6 @@ export var ordersActions = {
     },
     purchase: (token:string, userId:string, order:any)=>{
         return (dispatch:any)=>{
-            console.log(order);
             dispatch({type: ActionTypes.PURCHASE_START} as Action);
             
             const queryParams = `?auth=${token}`;
@@ -36,7 +35,6 @@ export var ordersActions = {
                     dispatch({
                         type: ActionTypes.PURCHASE_SUCCESS,
                     } as Action);
-                    console.log(res);
                 })
                 .catch(err=>{
                     dispatch(

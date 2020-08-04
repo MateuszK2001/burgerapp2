@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useLayoutEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { Validation } from '../../components/UI/Form/Validation/Validation';
 import InputText from '../../components/UI/Form/Inputs/InputText/InputText';
 import Button from '../../components/UI/Button/Button';
@@ -7,7 +7,7 @@ import { authActions } from '../../store/actions/authActions';
 import { connect } from 'react-redux';
 import { MergedState } from '../..';
 import Spinner from '../../components/UI/Spinner/Spinner';
-import { Redirect, useHistory } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 interface Props {
     auth: (email: string, pass: string, isSignUp: boolean) => Promise<void>;
@@ -65,7 +65,6 @@ const Auth = (props: Props) => {
     } as FormData);
     const [loading, loadingUpdate] = useState(false);
 
-    const history = useHistory();
 
     useEffect(() => {
         const valid = Object.values(formData).reduce((isFormValid: boolean, element: InputElement) => {

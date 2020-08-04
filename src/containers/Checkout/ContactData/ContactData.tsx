@@ -108,6 +108,7 @@ const ContactData = (props: Props) => {
             valid: false,
             validation: {
                 required: true,
+                isEmail: true
             },
         },
 

@@ -163,5 +163,7 @@ const dispatchToProps = (dispatch: any) => {
         purchaseInit: () => dispatch(ordersActions.purchaseInit()),
         setRedirectPath: (path: string) => dispatch(authActions.setRedirectPath(path))
     };
-}
+};
+
+export {BurgerBuilder as _BurgerBuilder};
 export default withErrorHandler(connect(stateToProps, dispatchToProps)(BurgerBuilder), AxiosOrders);
